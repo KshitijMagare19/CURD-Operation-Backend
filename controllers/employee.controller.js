@@ -15,7 +15,7 @@ router.get('/',(req,resp) =>{
 router.post('/',(req,resp) =>{
     Employee.create(req.body)
     .then((data) => {
-        resp.send(data);
+        resp.status(201).json(data);
     }).catch((err) => {
         console.log(err);
     });
