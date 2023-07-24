@@ -2,43 +2,57 @@ const express = require('express');
 
 const router = express.Router();
 const Employee = require('../models/employee.model');
-const ObjectId = require('mongoose').Types.ObjectId;
+const {validateDbId,IdNotFound} = require('../middleware/index');
 
-router.get('/', (req, resp) => {
-    Employee.find()
+const { generateCrudMethods  } = require('../Services/index');
+const EmployeeCurd = generateCrudMethods(Employee);
+
+router.get('/', (req, res,next) => {
+    EmployeeCurd.getAll()
         .then((data) => {
-            resp.send(data);
+            res.send(data);
         }).catch((err) => {
-            console.log(err);
+            next(err);
         });
 })
-router.get('/:id', (req, resp) => {
-    if(ObjectId.isValid(req.params.id) == false)
-        resp.status(400).json({
-            error: "Invalid Id is passed, Please check ID."
-        })
-    else
-        Employee.findById(req.params.id)
+router.get('/:id',validateDbId, (req, res,next) => {
+    EmployeeCurd.getById(req.params.id)
             .then((data) => {
                 if (data) {
-                    resp.send(data);
+                    res.send(data);
                 }
                 else {
-                    resp.status(404).json({
-                        error: "The given : " + req.params.id + " ID not found"
-                    })
+                    IdNotFound(req,res)
                 }
             }).catch((err) => {
-                console.log(err);
+                next(err);
             });
 })
 
-router.post('/', (req, resp) => {
-    Employee.create(req.body)
+router.post('/', (req, res,next) => {
+    EmployeeCurd.create(req.body)
         .then((data) => {
-            resp.status(201).json(data);
+            res.status(201).json(data);
         }).catch((err) => {
-            console.log(err);
+            next(err);
+        });
+})
+
+router.put('/:id',validateDbId,(req, res,next) => {
+    EmployeeCurd.update(req.params.id,req.body)
+        .then((data) => {
+            res.send(data);
+        }).catch((err) => {
+            next(err);
+        });
+})
+
+router.delete('/:id',validateDbId,(req, res,next) => {
+    EmployeeCurd.delete(req.params.id)
+        .then((data) => {
+            res.send(data);
+        }).catch((err) => {
+            next(err);
         });
 })
 

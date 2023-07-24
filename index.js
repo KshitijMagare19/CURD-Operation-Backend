@@ -6,11 +6,12 @@ const bodyParser = require('body-parser');
 const connectDB = require('./db');
 const employeeRouter = require('./controllers/employee.controller')
 const app = express();
+const {ErrorHandler} = require('./middleware/index');
 
 //middleware
 app.use(bodyParser.json());
 app.use('/api/employee',employeeRouter);
-
+app.use(ErrorHandler);
 
 connectDB()
     .then(() => {
@@ -19,5 +20,5 @@ connectDB()
             console.log("Server started at port 3000 :)")
         });
     }).catch((err) => {
-        console.log(err);
+        next(err);
     });
